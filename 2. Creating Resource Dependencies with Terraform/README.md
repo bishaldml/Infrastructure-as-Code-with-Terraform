@@ -176,4 +176,96 @@ var.instance_name: myinstance
 var.instance_zone: ZONE
 
 ### Task 4. Create Explicit Dependency
+Explicit dependencies are used to inform dependencies between resources that are not visible to Terraform. In this example, consider that you will run on your instance that expects to use a specific Cloud Storage bucket, but that dependency is configured inside the application code and thus not visible to Terraform. In that case, you can use depends_on to explicitly declare the dependency.
 
+```
+vi exp.tf
+```
+Add a Cloud Storage bucket and an instance with an explicit dependency on the bucket by adding the following base code into exp.tf:
+```
+# Create a new instance that uses the bucket
+resource "google_compute_instance" "another_instance" {
+
+  name         = "terraform-instance-2"
+  machine_type = "e2-micro"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    network = "default"
+    access_config {
+    }
+  }
+  # Tells Terraform that this VM instance must be created only after the
+  # storage bucket has been created.
+  depends_on = [google_storage_bucket.example_bucket]
+}
+```
+Add the following code to create a bucket.
+```
+# New resource for the storage bucket our application will use.
+resource "google_storage_bucket" "example_bucket" {
+  name     = "<UNIQUE-BUCKET-NAME>"
+  location = "US"
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "404.html"
+  }
+}
+```
+The final code is as show below:
+```
+resource "google_compute_instance" "another_instance" {
+
+  name         = "terraform-instance-2"
+  machine_type = "e2-micro"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    network = "default"
+    access_config {
+    }
+  }
+  # Tells Terraform that this VM instance must be created only after the
+  # storage bucket has been created.
+  depends_on = [google_storage_bucket.example_bucket]
+}
+resource "google_storage_bucket" "example_bucket" {
+  name     = "<UNIQUE-BUCKET-NAME>"
+  location = "US"
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "404.html"
+  }
+}
+```
+
+```
+terraform plan
+```
+If prompted, enter the details for the instance creation as shown below:
+
+var.instance_name: myinstance
+
+var.instance_zone: ZONE
+
+```
+terraform apply
+```
+If prompted, enter the details for the instance creation as shown below:
+
+var.instance_name: myinstance
+
+var.instance_zone: ZONE
+
+
+### Task 5. View Dependency Graph
+To view resource dependency graph of the resource created, execute the following command
+```
+terraform graph | dot -Tsvg > graph.svg
+```
