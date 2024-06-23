@@ -12,3 +12,40 @@ In this lab you will learn how to perform the following tasks:
 1. Verify Terraform installation
 2.  Google Cloud as the provider
 3.  reate, change, and destroy Google Cloud resources by using Terraform
+
+
+```
+terraform --version
+```
+
+```
+vi main.tf
+```
+
+```
+resource "google_compute_instance" "terraform" {
+  name         = "terraform"
+  machine_type = "e2-medium"
+
+  tags         = ["web", "dev"]
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {
+    }
+  }
+  allow_stopping_for_update = true 
+}
+```
+
+
+1.```terraform init```
+2. ```terraform plan```
+3. ```terraform apply```
+4. ```terraform destroy```
