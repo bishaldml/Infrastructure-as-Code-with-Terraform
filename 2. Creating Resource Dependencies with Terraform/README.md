@@ -47,6 +47,51 @@ In the remaining part of the lab, we will cover the two types of dependencies th
 1. Implicit dependencies: Dependencies known to Terraform
 2. Explicit dependencies: Dependencies unknown to Terraform
 
+
+### Task 3. View Implicit Resource Dependency
+To demonstrate how Terraform infers an implicit dependency, we assign a static IP address to the VM instance.
+
+Create a VM instance
+```
+vi instance.tf
 ```
 
 ```
+resource google_compute_instance "vm_instance" {
+name         = "${var.instance_name}"
+zone         = "${var.instance_zone}"
+machine_type = "${var.instance_type}"
+boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+      }
+  }
+ network_interface {
+    network = "default"
+    access_config {
+      # Allocate a one-to-one NAT IP to the instance
+    }
+  }
+}
+```
+Create variables
+```
+vi variables.tf
+```
+
+```
+variable "instance_name" {
+  type        = string
+  description = "Name for the Google Compute instance"
+}
+variable "instance_zone" {
+  type        = string
+  description = "Zone for the Google Compute instance"
+}
+variable "instance_type" {
+  type        = string
+  description = "Disk type of the Google Compute instance"
+  default     = "e2-medium"
+  }
+```
+By giving instance_type a default value, you make the variable optional. The instance_name, and instance_zone are required, and you will define them at run time.
