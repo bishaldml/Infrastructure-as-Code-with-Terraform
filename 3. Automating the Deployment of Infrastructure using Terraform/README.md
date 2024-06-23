@@ -192,3 +192,4 @@ To apply the desired changes, run the following command:
 ```
 terraform apply
 ```
+### Task 3. Verify your deployment: In the Cloud Console, verify that the resources were created.
