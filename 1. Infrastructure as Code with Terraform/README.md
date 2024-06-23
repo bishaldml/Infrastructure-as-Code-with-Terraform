@@ -10,8 +10,8 @@ You will explore how to update the VM instance. You will edit the existing confi
 In this lab you will learn how to perform the following tasks:
 
 1. Verify Terraform installation
-2.  Google Cloud as the provider
-3.  reate, change, and destroy Google Cloud resources by using Terraform
+2. Google Cloud as the provider
+3. Create, change, and destroy Google Cloud resources by using Terraform
 
 
 ```
