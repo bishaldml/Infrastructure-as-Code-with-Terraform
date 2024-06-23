@@ -162,6 +162,7 @@ terraform init
 terraform plan
 ```
 If prompted, enter the details for the instance creation as shown below:
+
 var.instance_name: myinstance
 
 var.instance_zone: ZONE
@@ -171,6 +172,7 @@ var.instance_zone: ZONE
 terraform apply
 ```
 If prompted, enter the details for the instance creation as shown below:
+
 var.instance_name: myinstance
 
 var.instance_zone: ZONE
