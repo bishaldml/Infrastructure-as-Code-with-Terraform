@@ -45,7 +45,7 @@ resource "google_compute_instance" "terraform" {
 ```
 
 
-1.```terraform init```
+1. ```terraform init```
 
 2. ```terraform plan```
    
