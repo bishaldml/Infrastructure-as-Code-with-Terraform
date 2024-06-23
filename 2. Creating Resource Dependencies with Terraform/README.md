@@ -95,3 +95,85 @@ variable "instance_type" {
   }
 ```
 By giving instance_type a default value, you make the variable optional. The instance_name, and instance_zone are required, and you will define them at run time.
+
+Create output values
+```
+vi outputs.tf
+```
+
+```
+output "network_IP" {
+  value = google_compute_instance.vm_instance.instance_id
+  description = "The internal ip address of the instance"
+}
+output "instance_link" {
+  value = google_compute_instance.vm_instance.self_link
+  description = "The URI of the created resource."
+}
+```
+Assign a static IP: 
+
+Now add to your configuration by assigning a static IP to the VM instance in instance.tf
+```
+resource "google_compute_address" "vm_static_ip" {
+  name = "terraform-static-ip"
+}
+```
+Update the network_interface configuration for your instance like so:
+```
+ network_interface {
+    network = "default"
+    access_config {
+      # Allocate a one-to-one NAT IP to the instance
+      nat_ip = google_compute_address.vm_static_ip.address
+    }
+  }
+```
+The final code is as shown below.
+```
+ resource "google_compute_address" "vm_static_ip" {
+  name = "terraform-static-ip"
+}
+ resource google_compute_instance "vm_instance" {
+name         = "${var.instance_name}"
+zone         = "${var.instance_zone}"
+machine_type = "${var.instance_type}"
+boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+      }
+  }
+ network_interface {
+    network = "default"
+    access_config {
+      # Allocate a one-to-one NAT IP to the instance
+      nat_ip = google_compute_address.vm_static_ip.address
+    }
+  }
+}
+```
+#
+1. Initialize terraform by running the following command:
+```
+terraform init
+```
+2. Run the following command to preview the resources created:
+```
+terraform plan
+```
+If prompted, enter the details for the instance creation as shown below:
+var.instance_name: myinstance
+
+var.instance_zone: ZONE
+
+3. Run the following command to view the order of resource creation
+```
+terraform apply
+```
+If prompted, enter the details for the instance creation as shown below:
+var.instance_name: myinstance
+
+var.instance_zone: ZONE
+
+### Task 4. Create Explicit Dependency
+
