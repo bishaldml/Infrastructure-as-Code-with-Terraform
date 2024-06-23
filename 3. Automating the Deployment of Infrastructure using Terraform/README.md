@@ -1,46 +1,64 @@
-Automating the Deployment of Infrastructure Using Terraform
+# Automating-the-Deployment-of-Infrastructure-Using-Terraform
+Google Cloud
 
-## 1. Overview
+### Overview
 Terraform enables you to safely and predictably create, change, and improve infrastructure. It is an open-source tool that codifies APIs into declarative configuration files that can be shared among team members, treated as code, edited, reviewed, and versioned.
 
 In this lab, you create a Terraform configuration with a module to automate the deployment of Google Cloud infrastructure. Specifically, you deploy one auto mode network with a firewall rule and two VM instances, as shown in this diagram:
 ![](image.png)
-## 2. Objectives
-In this lab, you learn how to perform the following tasks:
+## Task-1: Set up Terraform and Cloud Shell
+1. Install Terraform:
+   
+Terraform is now integrated into Cloud Shell. Verify which version is installed.
+  1. In the Cloud Console, click Activate Cloud Shell (Activate Cloud Shell icon).
+  2. If prompted, click Continue.
+  3. To confirm that Terraform is installed, run the following command:```terraform --version```
+2. To create a directory for your Terraform configuration, run the following command: ```mkdir tf-infra```
 
-1. Create a configuration for an auto mode network
-2. Create a configuration for a firewall rule
-3. Create and deploy a configuration
-4. Verify the deployment of a configuration
-
-### Task 1. Set up Terraform and Cloud Shell
-To confirm that Terraform is installed, run the following command:
-```
-terraform --version
-```
-To create a directory for your Terraform configuration, run the following command:
-```
-mkdir tfinfra
-cd tfinfra
-```
-
+### Initialize Terraform
+1. Create a new file inside tf-infra directory:
 ```
 vi provider.tf
 ```
-Copy the code into provider.tf
+Copy the code into provider.tf:
 ```
 provider "google" {}
 ```
-To initialize Terraform, run the following command:
+2. To initialize Terraform, run the following command:
 ```
+cd tfinfra
 terraform init
 ```
-
-### Task 2. Create mynetwork and its resources
+### Task-2: Create mynetwork and its resources
+Creating the auto mode network mynetwork along with its firewall rule and two VM instances (mynet_us_vm and mynet_eu_vm).
+1. Configure mynetwork: ```vi mynetwork.tf``` 
 ```
-vi mynetwork.tf
+# Create the mynetwork network
+resource "google_compute_network" "mynetwork" {
+name = "mynetwork"
+# RESOURCE properties go here
+auto_create_subnetworks = "true"
+}
 ```
-
+2. Configure the firewall rule: Define a firewall rule to allow HTTP, SSH, RDP, and ICMP traffic on mynetwork.
+   1. Add the following base code to mynetwork.tf:
+    ```
+    # Add a firewall rule to allow HTTP, SSH, RDP and ICMP traffic on mynetwork
+    resource "google_compute_firewall" "mynetwork-allow-http-ssh-rdp-icmp" {
+    name = "mynetwork-allow-http-ssh-rdp-icmp"
+    # RESOURCE properties go here
+    network = google_compute_network.mynetwork.self_link
+    allow {
+        protocol = "tcp"
+        ports    = ["22", "80", "3389"]
+        }
+    allow {
+        protocol = "icmp"
+        }
+    source_ranges = ["0.0.0.0/0"]
+    }
+    ```
+3. Verify that your mynetwork.tf file look like this:
 ```
 # Create the mynetwork network
 resource "google_compute_network" "mynetwork" {
@@ -63,11 +81,7 @@ allow {
 source_ranges = ["0.0.0.0/0"]
 }
 ```
-Configure the VM instance
-```
-vi main.tf
-```
-
+4. Configure the VM instance: ```vi main.tf```
 ```
 resource "google_compute_instance" "vm_instance" {
   name         = "${var.instance_name}"
@@ -86,11 +100,7 @@ resource "google_compute_instance" "vm_instance" {
   }
 }
 ```
-Define the 4 input variables in variables.tf
-```
-vi variables.tf
-```
-
+5. Define the 4 input variables in variables.tf:
 ```
 variable "instance_name" {}
 variable "instance_zone" {}
@@ -99,11 +109,8 @@ variable "instance_type" {
   }
 variable "instance_network" {}
 ```
-By giving instance_type a default value, you make the variable optional. The instance_name, instance_zone, and instance_network are required, and you will define them in mynetwork.tf
-
-Add the following VM instances to mynetwork.tf
+6. Add the following VM instances to mynetwork.tf:
 ```
-
 # Create the mynet-us-vm instance
 module "mynet-us-vm" {
   source           = "./instance"
@@ -120,9 +127,7 @@ module "mynet-eu-vm" {
   instance_network = google_compute_network.mynetwork.self_link
 }
 ```
-These resources are leveraging the module in the instance folder and provide the name, zone, and network as inputs. Because these instances depend on a VPC network, you are using the google_compute_network.mynetwork.self_link reference to instruct Terraform to resolve these resources in a dependent order. In this case, the network is created before the instance.
-
-Verify that mynetwork.tf looks like this, including brackets {}
+7. Verify that mynetwork.tf looks like this, including brackets {}
 ```
 # Create the mynetwork network
 resource "google_compute_network" "mynetwork" {
@@ -159,23 +164,8 @@ module "mynet-eu-vm" {
   instance_network = google_compute_network.mynetwork.self_link
 }
 ```
-
-Create mynetwork and its resources:
-
-To rewrite the Terraform configuration files to a canonical format and style, run the following command:
-```
-terraform fmt
-```
-To initialize Terraform, run the following command:
-```
-terraform init
-```
-To create an execution plan, run the following command:
-```
-terraform plan
-```
-To apply the desired changes, run the following command:
-```
-terraform apply
-```
-### Task 3. Verify your deployment: In the Cloud Console, verify that the resources were created.
+8. To rewrite the Terraform configuration files to a canonical format and style, run the following command: ```terraform fmt```
+9. To initialize Terraform, run the following command: ```terraform init```
+10. To create an execution plan, run the following command: ```terraform plan```
+11. To apply the desired changes, run the following command: ```terraform apply```
+12. To terminate/destory all the resources managed by Terraform project, run the following command: ```terraform destory```
