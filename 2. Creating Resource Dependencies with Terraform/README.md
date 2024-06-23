@@ -26,7 +26,7 @@ cd tf_project
 ```
 
 ```
-vi project.tf
+vi provider.tf
 ```
 
 ```
